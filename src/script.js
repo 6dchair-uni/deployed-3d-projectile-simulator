@@ -4,10 +4,6 @@ import * as dat from 'lil-gui';
 import * as CANNON from 'cannon-es';
 
 document.addEventListener("DOMContentLoaded", () => {
-  // =============================================================
-  // PAGE ELEMENTS
-  // =============================================================
-
   const firstPage = document.getElementById("firstPage");
   const simulateButton = document.getElementById("simulateButton");
   const instructionsText = document.getElementById("instructionsText");
@@ -19,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let isSceneInitialized = false;
 
   // =============================================================
-  // ENTER SIMULATOR
+  // WELCOME PAGE
   // =============================================================
 
   simulateButton.addEventListener("click", () => {
@@ -33,19 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // =============================================================
-  // RETURN TO WELCOME PAGE
-  // =============================================================
-
   backToWelcome.addEventListener("click", () => {
     canvas.style.display = "none";
     backToWelcome.style.display = "none";
     firstPage.style.display = "flex";
   });
-
-  // =============================================================
-  // INSTRUCTIONS
-  // =============================================================
 
   instructionsText.addEventListener("click", () => {
     instructionsPopup.classList.remove("hidden");
@@ -56,22 +44,40 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =============================================================
-  // THREE.JS SCENE
+  // MAIN SIMULATION
   // =============================================================
 
   function initializeScene() {
-    // -----------------------------------------------------------
+    // ===========================================================
+    // CONSTANTS
+    // ===========================================================
+
+    const GRAVITY = 9.82;
+
+    // Radius of the visual/physics ball
+    const BALL_RADIUS = 0.25;
+
+    // Standard air density near sea level
+    const AIR_DENSITY = 1.225;
+
+    // Approximate drag coefficient for a sphere
+    const DRAG_COEFFICIENT = 0.47;
+
+    // Cross-sectional area of sphere
+    const BALL_AREA = Math.PI * BALL_RADIUS * BALL_RADIUS;
+
+    // ===========================================================
     // SIZES
-    // -----------------------------------------------------------
+    // ===========================================================
 
     const sizes = {
       width: window.innerWidth,
       height: window.innerHeight,
     };
 
-    // -----------------------------------------------------------
+    // ===========================================================
     // GUI
-    // -----------------------------------------------------------
+    // ===========================================================
 
     const gui = new dat.GUI();
 
@@ -82,78 +88,33 @@ document.addEventListener("DOMContentLoaded", () => {
     gui.domElement.style.fontFamily = "'IBM Plex Mono', monospace";
     gui.domElement.style.zIndex = "20";
 
-    // =============================================================
-    // MAKE GUI DRAGGABLE
-    // =============================================================
-
-    let isDraggingGUI = false;
-    let guiOffsetX = 0;
-    let guiOffsetY = 0;
-
-    const guiTitle = gui.domElement.querySelector(".title");
-
-    if (guiTitle) {
-      guiTitle.style.cursor = "move";
-
-      guiTitle.addEventListener("mousedown", (event) => {
-        isDraggingGUI = true;
-
-        const rect = gui.domElement.getBoundingClientRect();
-
-        guiOffsetX = event.clientX - rect.left;
-        guiOffsetY = event.clientY - rect.top;
-
-        event.preventDefault();
-      });
-    }
-
-    document.addEventListener("mousemove", (event) => {
-      if (!isDraggingGUI) return;
-
-      const newLeft = event.clientX - guiOffsetX;
-      const newTop = event.clientY - guiOffsetY;
-
-      gui.domElement.style.left = `${newLeft}px`;
-      gui.domElement.style.top = `${newTop}px`;
-    });
-
-    document.addEventListener("mouseup", () => {
-      isDraggingGUI = false;
-    });
-
-    // -----------------------------------------------------------
-    // CANVAS
-    // -----------------------------------------------------------
-
-    const canvas = document.querySelector("canvas.webgl");
-
-    // =============================================================
-    // THREE.JS SETUP
-    // =============================================================
+    // ===========================================================
+    // THREE.JS SCENE
+    // ===========================================================
 
     const scene = new THREE.Scene();
 
-    // Transparent scene so the CSS background is visible
+    // Transparent background so the CSS background remains visible.
     scene.background = null;
 
-    // -----------------------------------------------------------
+    // ===========================================================
     // CAMERA
-    // -----------------------------------------------------------
+    // ===========================================================
 
     const camera = new THREE.PerspectiveCamera(
       75,
       sizes.width / sizes.height,
       0.1,
-      150
+      100
     );
 
     camera.position.set(0, 4, 12);
 
     scene.add(camera);
 
-    // -----------------------------------------------------------
+    // ===========================================================
     // RENDERER
-    // -----------------------------------------------------------
+    // ===========================================================
 
     const renderer = new THREE.WebGLRenderer({
       canvas: canvas,
@@ -167,19 +128,19 @@ document.addEventListener("DOMContentLoaded", () => {
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // =============================================================
+    // ===========================================================
     // ORBIT CONTROLS
-    // =============================================================
+    // ===========================================================
 
     const controls = new OrbitControls(camera, canvas);
 
     controls.minDistance = 5;
-    controls.maxDistance = 60;
+    controls.maxDistance = 50;
     controls.enableDamping = true;
 
-    // =============================================================
+    // ===========================================================
     // LIGHTING
-    // =============================================================
+    // ===========================================================
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
@@ -190,13 +151,13 @@ document.addEventListener("DOMContentLoaded", () => {
     directionalLight.shadow.mapSize.width = 1024;
     directionalLight.shadow.mapSize.height = 1024;
     directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 100;
+    directionalLight.shadow.camera.far = 50;
 
     scene.add(directionalLight);
 
-    // =============================================================
+    // ===========================================================
     // BALL
-    // =============================================================
+    // ===========================================================
 
     const textureLoader = new THREE.TextureLoader();
 
@@ -211,21 +172,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const ball = new THREE.Mesh(
-      new THREE.SphereGeometry(0.25, 32, 32),
+      new THREE.SphereGeometry(BALL_RADIUS, 32, 32),
       ballMaterial
     );
 
-    ball.position.set(-7, 1.25, 0);
     ball.castShadow = true;
 
     scene.add(ball);
 
-    // =============================================================
-    // LONGER GROUND
-    // =============================================================
-
-    const FLOOR_LENGTH = 30;
-    const FLOOR_WIDTH = 5;
+    // ===========================================================
+    // GROUND
+    // ===========================================================
 
     const groundMaterial = new THREE.MeshPhysicalMaterial({
       color: 0xaaaaaa,
@@ -240,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(FLOOR_LENGTH, FLOOR_WIDTH),
+      new THREE.PlaneGeometry(15, 5),
       groundMaterial
     );
 
@@ -249,16 +206,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scene.add(ground);
 
-    // =============================================================
-    // FLOOR BORDERS
-    // =============================================================
+    // ===========================================================
+    // GROUND BORDERS
+    // ===========================================================
 
     const borderMaterial = new THREE.MeshStandardMaterial({
       color: 0x000000,
     });
 
     const leftBorder = new THREE.Mesh(
-      new THREE.BoxGeometry(FLOOR_LENGTH, 0.1, 0.2),
+      new THREE.BoxGeometry(15, 0.1, 0.2),
       borderMaterial
     );
 
@@ -267,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
     scene.add(leftBorder);
 
     const rightBorder = new THREE.Mesh(
-      new THREE.BoxGeometry(FLOOR_LENGTH, 0.1, 0.2),
+      new THREE.BoxGeometry(15, 0.1, 0.2),
       borderMaterial
     );
 
@@ -275,60 +232,81 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scene.add(rightBorder);
 
-    // =============================================================
+    // ===========================================================
     // LAUNCH HEIGHT BOX
-    // =============================================================
-
-    const launchBoxMaterial = new THREE.MeshStandardMaterial({
-      color: 0x666666,
-      roughness: 0.7,
-      metalness: 0.2,
-      transparent: true,
-      opacity: 0.75,
-    });
+    // ===========================================================
 
     const launchBox = new THREE.Mesh(
       new THREE.BoxGeometry(1.5, 1, 1.5),
-      launchBoxMaterial
+      new THREE.MeshStandardMaterial({
+        color: 0x666666,
+        roughness: 0.7,
+        metalness: 0.2,
+      })
     );
 
-    launchBox.position.set(-7, 0.5, 0);
     launchBox.castShadow = true;
     launchBox.receiveShadow = true;
 
     scene.add(launchBox);
 
-    // =============================================================
+    // ===========================================================
     // HEIGHT LABEL
-    // =============================================================
+    // ===========================================================
 
     const heightLabel = document.createElement("div");
 
     heightLabel.id = "launchHeightLabel";
-    heightLabel.textContent = "100 cm";
+    heightLabel.textContent = "100.0 cm";
 
     heightLabel.style.position = "fixed";
     heightLabel.style.transform = "translate(-50%, -50%)";
     heightLabel.style.fontFamily = "'IBM Plex Mono', monospace";
     heightLabel.style.fontSize = "14px";
     heightLabel.style.fontWeight = "600";
-    heightLabel.style.color = "#000";
+    heightLabel.style.color = "#111";
     heightLabel.style.background = "rgba(255,255,255,0.85)";
     heightLabel.style.padding = "4px 8px";
     heightLabel.style.borderRadius = "4px";
     heightLabel.style.pointerEvents = "none";
-    heightLabel.style.zIndex = "19";
+    heightLabel.style.zIndex = "15";
 
     document.body.appendChild(heightLabel);
 
-    // =============================================================
-    // PHYSICS WORLD
-    // =============================================================
+    // ===========================================================
+    // PROJECTILE INFORMATION PANEL
+    // ===========================================================
+
+    const projectileInfo = document.createElement("div");
+
+    projectileInfo.id = "projectileInfo";
+
+    projectileInfo.style.position = "fixed";
+    projectileInfo.style.right = "20px";
+    projectileInfo.style.bottom = "20px";
+    projectileInfo.style.width = "290px";
+    projectileInfo.style.padding = "16px";
+    projectileInfo.style.background = "rgba(255,255,255,0.93)";
+    projectileInfo.style.border = "1px solid rgba(0,0,0,0.15)";
+    projectileInfo.style.borderRadius = "8px";
+    projectileInfo.style.boxShadow = "0 4px 15px rgba(0,0,0,0.15)";
+    projectileInfo.style.fontFamily = "'IBM Plex Mono', monospace";
+    projectileInfo.style.fontSize = "12px";
+    projectileInfo.style.lineHeight = "1.7";
+    projectileInfo.style.color = "#111";
+    projectileInfo.style.zIndex = "20";
+    projectileInfo.style.display = "none";
+
+    document.body.appendChild(projectileInfo);
+
+    // ===========================================================
+    // CANNON WORLD
+    // ===========================================================
 
     const world = new CANNON.World();
 
     world.broadphase = new CANNON.SAPBroadphase(world);
-    world.gravity.set(0, -9.82, 0);
+    world.gravity.set(0, -GRAVITY, 0);
 
     const defaultMaterial = new CANNON.Material("default");
 
@@ -343,13 +321,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     world.defaultContactMaterial = defaultContactMaterial;
 
-    // =============================================================
-    // PHYSICS FLOOR
-    // =============================================================
+    // ===========================================================
+    // PHYSICS GROUND
+    // ===========================================================
 
-    const groundShape = new CANNON.Box(
-      new CANNON.Vec3(FLOOR_LENGTH / 2, 0.25, FLOOR_WIDTH / 2)
-    );
+    const groundShape = new CANNON.Box(new CANNON.Vec3(7.5, 0.25, 2.5));
 
     const groundBody = new CANNON.Body({
       mass: 0,
@@ -359,9 +335,9 @@ document.addEventListener("DOMContentLoaded", () => {
     groundBody.addShape(groundShape);
     world.addBody(groundBody);
 
-    // =============================================================
+    // ===========================================================
     // LAUNCH PLATFORM PHYSICS
-    // =============================================================
+    // ===========================================================
 
     let launchBoxBody = null;
 
@@ -386,102 +362,218 @@ document.addEventListener("DOMContentLoaded", () => {
 
       launchBoxBody.addShape(boxShape);
 
-      // Bottom of box = floor
+      // Bottom of box touches floor.
       launchBoxBody.position.set(-7, height / 2, 0);
 
       world.addBody(launchBoxBody);
     }
 
-    // =============================================================
+    // ===========================================================
     // PHYSICS BALL
-    // =============================================================
+    // ===========================================================
 
-    const ballShape = new CANNON.Sphere(0.25);
+    const ballShape = new CANNON.Sphere(BALL_RADIUS);
 
     const ballBody = new CANNON.Body({
-      mass: 1,
+      mass: 5,
       material: defaultMaterial,
     });
 
     ballBody.addShape(ballShape);
-    ballBody.position.set(-7, 1.25, 0);
-
     world.addBody(ballBody);
 
-    // =============================================================
-    // PROJECTILE TRAJECTORY
-    // =============================================================
+    // ===========================================================
+    // TRAJECTORY
+    // ===========================================================
 
-    const trajectoryPoints = [];
-
-    const trajectoryGeometry = new THREE.BufferGeometry();
-
-    const trajectoryMaterial = new THREE.LineDashedMaterial({
-      color: 0x111111,
-      dashSize: 0.25,
-      gapSize: 0.15,
-    });
-
-    const trajectoryLine = new THREE.Line(
-      trajectoryGeometry,
-      trajectoryMaterial
-    );
-
-    trajectoryLine.computeLineDistances();
-
-    scene.add(trajectoryLine);
+    let trajectoryPoints = [];
+    let trajectoryLine = null;
+    let projectileHasLaunched = false;
+    let launchStartTime = 0;
+    let maximumHeightReached = 0;
 
     function clearTrajectory() {
-      trajectoryPoints.length = 0;
+      trajectoryPoints = [];
 
-      trajectoryGeometry.setFromPoints([]);
+      if (trajectoryLine) {
+        scene.remove(trajectoryLine);
+
+        trajectoryLine.geometry.dispose();
+        trajectoryLine.material.dispose();
+
+        trajectoryLine = null;
+      }
     }
 
-    function updateTrajectory() {
+    function updateTrajectoryLine() {
       if (trajectoryPoints.length < 2) {
         return;
       }
 
-      trajectoryGeometry.setFromPoints(trajectoryPoints);
+      if (trajectoryLine) {
+        scene.remove(trajectoryLine);
+
+        trajectoryLine.geometry.dispose();
+        trajectoryLine.material.dispose();
+      }
+
+      const geometry = new THREE.BufferGeometry().setFromPoints(
+        trajectoryPoints
+      );
+
+      const material = new THREE.LineDashedMaterial({
+        color: 0x111111,
+        dashSize: 0.22,
+        gapSize: 0.12,
+        transparent: true,
+        opacity: 0.8,
+      });
+
+      trajectoryLine = new THREE.Line(geometry, material);
 
       trajectoryLine.computeLineDistances();
+
+      scene.add(trajectoryLine);
     }
 
-    // =============================================================
-    // COMPUTED INFORMATION
-    // =============================================================
+    // ===========================================================
+    // CALCULATION PANEL
+    // ===========================================================
 
-    const projectileInfo = document.createElement("div");
+    function showInitialCalculation() {
+      const angleRadians = THREE.MathUtils.degToRad(settings.angle);
 
-    projectileInfo.id = "projectileInfo";
+      const vx = settings.velocity * Math.cos(angleRadians);
+      const vy = settings.velocity * Math.sin(angleRadians);
 
-    projectileInfo.style.position = "fixed";
-    projectileInfo.style.right = "20px";
-    projectileInfo.style.bottom = "20px";
-    projectileInfo.style.background = "rgba(255,255,255,0.9)";
-    projectileInfo.style.color = "#111";
-    projectileInfo.style.padding = "12px 16px";
-    projectileInfo.style.borderRadius = "6px";
-    projectileInfo.style.fontFamily = "'IBM Plex Mono', monospace";
-    projectileInfo.style.fontSize = "12px";
-    projectileInfo.style.lineHeight = "1.6";
-    projectileInfo.style.zIndex = "20";
-    projectileInfo.style.display = "none";
+      projectileInfo.innerHTML = `
+        <div style="font-weight:600; font-size:14px; margin-bottom:8px;">
+          Projectile Calculation
+        </div>
 
-    document.body.appendChild(projectileInfo);
+        <div>Launch Height: <strong>${settings.launchHeight.toFixed(2)} m</strong></div>
+        <div>Launch Height: <strong>${(settings.launchHeight * 100).toFixed(1)} cm</strong></div>
+        <div>Initial Velocity: <strong>${settings.velocity.toFixed(2)} m/s</strong></div>
+        <div>Launch Angle: <strong>${settings.angle.toFixed(2)}°</strong></div>
+        <div>Ball Mass: <strong>${settings.mass.toFixed(2)} kg</strong></div>
+        <div>Air Resistance: <strong>${settings.airResistance ? "ON" : "OFF"}</strong></div>
 
-    // =============================================================
+        ${
+          settings.airResistance
+            ? `
+              <div>Air Density: <strong>${AIR_DENSITY.toFixed(3)} kg/m³</strong></div>
+              <div>Drag Coefficient: <strong>${DRAG_COEFFICIENT.toFixed(2)}</strong></div>
+              <div>Ball Area: <strong>${BALL_AREA.toFixed(4)} m²</strong></div>
+            `
+            : ""
+        }
+
+        <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
+
+        <div>Horizontal Velocity: <strong>${vx.toFixed(2)} m/s</strong></div>
+        <div>Vertical Velocity: <strong>${vy.toFixed(2)} m/s</strong></div>
+
+        <div style="margin-top:8px; font-size:10px; opacity:0.65;">
+          Recording actual simulated trajectory...
+        </div>
+      `;
+
+      projectileInfo.style.display = "block";
+    }
+
+    function showFinalCalculation() {
+      const flightTime = performance.now() / 1000 - launchStartTime;
+      const horizontalRange = ballBody.position.x + 7;
+      const actualMaximumHeight = maximumHeightReached;
+
+      projectileInfo.innerHTML = `
+        <div style="font-weight:600; font-size:14px; margin-bottom:8px;">
+          Projectile Calculation
+        </div>
+
+        <div>Launch Height: <strong>${settings.launchHeight.toFixed(2)} m</strong></div>
+        <div>Launch Height: <strong>${(settings.launchHeight * 100).toFixed(1)} cm</strong></div>
+        <div>Initial Velocity: <strong>${settings.velocity.toFixed(2)} m/s</strong></div>
+        <div>Launch Angle: <strong>${settings.angle.toFixed(2)}°</strong></div>
+        <div>Ball Mass: <strong>${settings.mass.toFixed(2)} kg</strong></div>
+        <div>Air Resistance: <strong>${settings.airResistance ? "ON" : "OFF"}</strong></div>
+
+        ${
+          settings.airResistance
+            ? `
+              <div>Air Density: <strong>${AIR_DENSITY.toFixed(3)} kg/m³</strong></div>
+              <div>Drag Coefficient: <strong>${DRAG_COEFFICIENT.toFixed(2)}</strong></div>
+              <div>Ball Area: <strong>${BALL_AREA.toFixed(4)} m²</strong></div>
+            `
+            : ""
+        }
+
+        <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
+
+        <div>Actual Flight Time: <strong>${flightTime.toFixed(2)} s</strong></div>
+        <div>Actual Maximum Height: <strong>${actualMaximumHeight.toFixed(2)} m</strong></div>
+        <div>Actual Range: <strong>${horizontalRange.toFixed(2)} m</strong></div>
+
+        <div style="margin-top:8px; font-size:10px; opacity:0.65;">
+          Values measured from the physics simulation.
+        </div>
+      `;
+    }
+
+    // ===========================================================
+    // AIR RESISTANCE
+    // ===========================================================
+
+    function applyAirResistance() {
+      if (!settings.airResistance) {
+        return;
+      }
+
+      const velocity = ballBody.velocity;
+      const speed = velocity.length();
+
+      if (speed <= 0) {
+        return;
+      }
+
+      /*
+       * Quadratic drag:
+       *
+       * Fd = 1/2 * rho * Cd * A * v²
+       *
+       * The force points opposite
+       * the velocity vector.
+       */
+
+      const dragMagnitude =
+        0.5 * AIR_DENSITY * DRAG_COEFFICIENT * BALL_AREA * speed * speed;
+
+      const dragForce = new CANNON.Vec3(
+        (-velocity.x / speed) * dragMagnitude,
+        (-velocity.y / speed) * dragMagnitude,
+        (-velocity.z / speed) * dragMagnitude
+      );
+
+      ballBody.applyForce(dragForce, ballBody.position);
+    }
+
+    // ===========================================================
     // SETTINGS
-    // =============================================================
+    // ===========================================================
 
     const settings = {
       angle: 45,
       velocity: 10,
       mass: 5,
+
+      // 100 cm default
       launchHeight: 1.0,
+
       airResistance: false,
 
       reset: () => {
+        projectileHasLaunched = false;
+
         clearTrajectory();
 
         projectileInfo.style.display = "none";
@@ -493,69 +585,61 @@ document.addEventListener("DOMContentLoaded", () => {
       },
 
       launch: () => {
-        clearTrajectory();
-
-        projectileInfo.style.display = "block";
-
-        // ---------------------------------------------------------
-        // MASS
-        // ---------------------------------------------------------
-
+        // Apply selected mass.
         ballBody.mass = settings.mass;
         ballBody.updateMassProperties();
 
-        // ---------------------------------------------------------
-        // INITIAL VELOCITY
-        // ---------------------------------------------------------
+        // Clear old path.
+        clearTrajectory();
 
-        const angleInRadians = (settings.angle * Math.PI) / 180;
-        const speed = settings.velocity;
+        // Reset the ball to the selected launch height.
+        updateLaunchHeight();
 
-        // Preserve your existing mass-based velocity adjustment.
-        const adjustedSpeed = speed / Math.sqrt(settings.mass);
+        // Initial velocity.
+        const angleRadians = THREE.MathUtils.degToRad(settings.angle);
 
-        const vx = adjustedSpeed * Math.cos(angleInRadians);
-        const vy = adjustedSpeed * Math.sin(angleInRadians);
-
-        ballBody.velocity.set(vx, vy, 0);
-
-        // ---------------------------------------------------------
-        // AIR RESISTANCE
-        // ---------------------------------------------------------
-
-        ballBody.linearDamping = settings.airResistance ? 0.01 : 0;
-
-        // ---------------------------------------------------------
-        // INITIAL TRAJECTORY POINT
-        // ---------------------------------------------------------
-
-        trajectoryPoints.push(
-          new THREE.Vector3(
-            ballBody.position.x,
-            ballBody.position.y,
-            ballBody.position.z
-          )
+        ballBody.velocity.set(
+          settings.velocity * Math.cos(angleRadians),
+          settings.velocity * Math.sin(angleRadians),
+          0
         );
 
-        // ---------------------------------------------------------
-        // DISPLAY VALUES
-        // ---------------------------------------------------------
+        // Start trajectory recording.
+        projectileHasLaunched = true;
+        launchStartTime = performance.now() / 1000;
+        maximumHeightReached = ballBody.position.y;
 
-        projectileInfo.innerHTML = `
-          <strong>PROJECTILE</strong><br><br>
-          Launch Angle: ${settings.angle.toFixed(1)}°<br>
-          Launch Velocity: ${settings.velocity.toFixed(2)} m/s<br>
-          Effective Velocity: ${adjustedSpeed.toFixed(2)} m/s<br>
-          Launch Height: ${settings.launchHeight.toFixed(2)} m<br>
-          Mass: ${settings.mass.toFixed(2)} kg<br>
-          Air Resistance: ${settings.airResistance ? "ON" : "OFF"}
-        `;
+        showInitialCalculation();
       },
     };
 
-    // =============================================================
+    // ===========================================================
+    // GUI CONTROLS
+    // ===========================================================
+
+    gui.add(settings, "angle", 0, 90, 1).name("Launch Angle (°)");
+    gui.add(settings, "velocity", 0, 100, 0.1).name("Velocity (m/s)");
+    gui.add(settings, "mass", 0.1, 100, 0.1).name("Mass (kg)");
+
+    gui
+      .add(settings, "launchHeight", 0, 10, 0.01)
+      .name("Height (m)")
+      .onChange(() => {
+        updateLaunchHeight();
+        clearTrajectory();
+
+        projectileHasLaunched = false;
+
+        projectileInfo.style.display = "none";
+      });
+
+    gui.add(settings, "airResistance").name("Air Resistance");
+    gui.add(settings, "reset").name("Reset");
+    gui.add(settings, "launch").name("Launch");
+
+    // ===========================================================
     // UPDATE LAUNCH HEIGHT
-    // =============================================================
+    // ===========================================================
 
     function updateLaunchHeight() {
       const height = settings.launchHeight;
@@ -571,8 +655,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         launchBox.scale.y = height;
 
-        // Bottom remains at floor
-        launchBox.position.y = height / 2;
+        // Bottom touches floor.
+        launchBox.position.set(-7, height / 2, 0);
       }
 
       // ---------------------------------------------------------
@@ -582,10 +666,21 @@ document.addEventListener("DOMContentLoaded", () => {
       ballBody.velocity.set(0, 0, 0);
       ballBody.angularVelocity.set(0, 0, 0);
 
-      ballBody.position.set(-7, height + 0.25, 0);
+      /*
+       * Launch height represents the
+       * height of the ball's bottom
+       * above the floor.
+       *
+       * Ball center therefore sits
+       * at height + radius.
+       */
+
+      ballBody.position.set(-7, height + BALL_RADIUS, 0);
+
+      ball.position.copy(ballBody.position);
 
       // ---------------------------------------------------------
-      // PHYSICS BOX
+      // PHYSICS PLATFORM
       // ---------------------------------------------------------
 
       updateLaunchBoxPhysics(height);
@@ -594,65 +689,48 @@ document.addEventListener("DOMContentLoaded", () => {
       // LABEL
       // ---------------------------------------------------------
 
-      heightLabel.textContent = `${Math.round(height * 100)} cm`;
+      heightLabel.textContent = `${(height * 100).toFixed(1)} cm`;
     }
 
-    // =============================================================
-    // GUI CONTROLS
-    // =============================================================
-
-    gui.add(settings, "angle", 0, 90, 1).name("Launch Angle");
-    gui.add(settings, "velocity", 0, 100, 1).name("Launch Velocity");
-    gui.add(settings, "mass", 0.1, 100, 0.1).name("Ball Mass");
-
-    gui
-      .add(settings, "launchHeight", 0, 10, 0.1)
-      .name("Launch Height (m)")
-      .onChange(() => {
-        updateLaunchHeight();
-        clearTrajectory();
-      });
-
-    gui.add(settings, "airResistance").name("Air Resistance");
-    gui.add(settings, "reset").name("Reset");
-    gui.add(settings, "launch").name("Launch");
-
-    // Initial state
+    // Initial state: 100 cm launch height.
     updateLaunchHeight();
 
-    // =============================================================
-    // ANIMATION
-    // =============================================================
+    // ===========================================================
+    // ANIMATION LOOP
+    // ===========================================================
 
     const clock = new THREE.Clock();
     let oldElapsedTime = 0;
-    let wasLaunched = false;
 
     const tick = () => {
       const elapsedTime = clock.getElapsedTime();
       const deltaTime = elapsedTime - oldElapsedTime;
       oldElapsedTime = elapsedTime;
 
-      // ---------------------------------------------------------
+      // =========================================================
+      // AIR RESISTANCE
+      // =========================================================
+
+      applyAirResistance();
+
+      // =========================================================
       // PHYSICS
-      // ---------------------------------------------------------
+      // =========================================================
 
-      world.step(1 / 80, deltaTime, 3);
+      world.step(1 / 120, deltaTime, 5);
 
-      // ---------------------------------------------------------
+      // =========================================================
       // UPDATE BALL
-      // ---------------------------------------------------------
+      // =========================================================
 
       ball.position.copy(ballBody.position);
       ball.quaternion.copy(ballBody.quaternion);
 
-      // ---------------------------------------------------------
-      // RECORD ACTUAL PATH
-      // ---------------------------------------------------------
+      // =========================================================
+      // RECORD ACTUAL TRAJECTORY
+      // =========================================================
 
-      const speed = ballBody.velocity.length();
-
-      if (speed > 0.01 && ballBody.position.y > 0.25) {
+      if (projectileHasLaunched) {
         trajectoryPoints.push(
           new THREE.Vector3(
             ballBody.position.x,
@@ -661,30 +739,36 @@ document.addEventListener("DOMContentLoaded", () => {
           )
         );
 
-        updateTrajectory();
+        // Track maximum height.
+        if (ballBody.position.y > maximumHeightReached) {
+          maximumHeightReached = ballBody.position.y;
+        }
 
-        wasLaunched = true;
+        // Update visible dashed path.
+        updateTrajectoryLine();
+
+        /*
+         * Ball center reaches 0.25 m
+         * when the bottom of the ball
+         * touches the floor.
+         */
+
+        if (ballBody.position.y <= BALL_RADIUS + 0.01) {
+          projectileHasLaunched = false;
+
+          showFinalCalculation();
+        }
       }
 
-      // ---------------------------------------------------------
-      // STOP RECORDING AFTER LANDING
-      // ---------------------------------------------------------
-
-      if (wasLaunched && ballBody.position.y <= 0.25 && speed < 0.1) {
-        ballBody.velocity.set(0, 0, 0);
-
-        wasLaunched = false;
-      }
-
-      // ---------------------------------------------------------
-      // ORBIT CONTROLS
-      // ---------------------------------------------------------
+      // =========================================================
+      // CONTROLS
+      // =========================================================
 
       controls.update();
 
-      // ---------------------------------------------------------
+      // =========================================================
       // HEIGHT LABEL
-      // ---------------------------------------------------------
+      // =========================================================
 
       if (launchBox.visible) {
         const labelPosition = new THREE.Vector3(
@@ -698,25 +782,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const x = (labelPosition.x * 0.5 + 0.5) * sizes.width;
         const y = (-labelPosition.y * 0.5 + 0.5) * sizes.height;
 
-        heightLabel.style.display = "block";
         heightLabel.style.left = `${x}px`;
         heightLabel.style.top = `${y}px`;
+        heightLabel.style.display = "block";
       } else {
         heightLabel.style.display = "none";
       }
 
-      // ---------------------------------------------------------
+      // =========================================================
       // RENDER
-      // ---------------------------------------------------------
+      // =========================================================
 
       renderer.render(scene, camera);
 
       requestAnimationFrame(tick);
     };
 
-    // =============================================================
+    // ===========================================================
     // RESIZE
-    // =============================================================
+    // ===========================================================
 
     window.addEventListener("resize", () => {
       sizes.width = window.innerWidth;
@@ -729,7 +813,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
 
-    // Start
     tick();
   }
 });
