@@ -6,16 +6,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple 3D Projectile Simulator</title>
   
-  <script type="module" crossorigin src="./assets/index-d560238a.js"></script>
-  <link rel="stylesheet" href="./assets/index-3f0932ac.css">
+  <script type="module" crossorigin src="./assets/index-f3a1b973.js"></script>
+  <link rel="stylesheet" href="./assets/index-daca0608.css">
 </head>
 
 <body>
-  <div id="firstPage" class="overlay">
-      <h1>Simple 3D Projectile Simulator</h1>
-      <h2>[v 1.0]</h2>
 
-      <p id="instructionsText" class="clickable">Instructions</p>
+  <div id="firstPage" class="overlay">
+
+      <div class="landing-content">
+
+          <div class="landing-label">
+              PHYSICS / 01
+          </div>
+
+          <h1>
+              Projectile<br>
+              Motion
+          </h1>
+
+          <p class="landing-description">
+              An interactive 3D simulation of projectile motion
+              and dynamics.
+          </p>
+
+          <div class="landing-actions">
+              <button id="simulateButton">
+                  Start Simulation →
+              </button>
+
+              <p id="instructionsText" class="clickable">
+                  Instructions
+              </p>
+          </div>
+
+          <div class="landing-meta">
+              <span>GRAVITY&nbsp;&nbsp; 9.82 m/s²</span>
+              <span>PHYSICS&nbsp;&nbsp; CANNON-ES</span>
+              <span>RENDERING&nbsp;&nbsp; THREE.JS</span>
+          </div>
+
+      </div>
 
       <div id="instructionsPopup" class="popup hidden">
           <p>Use the controls to adjust the launch angle, velocity, height, and mass of the ball.</p>
@@ -25,7 +56,6 @@
           <button id="closeInstructions">OK</button>
       </div>
 
-      <button id="simulateButton">Simulate</button>
   </div>
 
   <canvas class="webgl"></canvas>

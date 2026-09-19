@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===========================================================
 
     const launchBox = new THREE.Mesh(
-      new THREE.BoxGeometry(1.5, 1, 1.5),
+      new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshStandardMaterial({
         color: 0x666666,
         roughness: 0.7,
@@ -388,7 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const boxShape = new CANNON.Box(
-        new CANNON.Vec3(0.75, height / 2, 0.75)
+        new CANNON.Vec3(0.5, height / 2, 0.5)
       );
 
       launchBoxBody = new CANNON.Body({
