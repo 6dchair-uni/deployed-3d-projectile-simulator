@@ -88,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===========================================================
     // CONSTANTS
     // ===========================================================
-    gui = new dat.GUI();
     const GRAVITY = 9.82;
 
     // Radius of the visual/physics ball
@@ -807,7 +806,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // HEIGHT LABEL
       // =========================================================
 
-      if (launchBox.visible) {
+      if (launchBox.visible && canvas.style.display !== "none") {
         const labelPosition = new THREE.Vector3(
           -6.1,
           settings.launchHeight / 2,
