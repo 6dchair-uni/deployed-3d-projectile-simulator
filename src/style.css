@@ -1,8 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+:root {
+    --serif: 'Inter', ui-sans-serif, sans-serif;       /* headings + body copy */
+    --sans: 'Inter', ui-sans-serif, sans-serif;        /* general UI */
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;  /* nav, tags, labels, footer */
+}
+
 * {
     margin: 0;
     padding: 0;
 }
 
+body {
+    font-family: var(--sans);
+}
 
 html,
 body {
@@ -50,6 +60,7 @@ body {
 }
 
 .overlay h1 {
+    font-family: var(--serif);
     color: rgba(0, 0, 0, 0.8);
     font-size: 3em;
     margin-bottom: 0.5em;
@@ -57,18 +68,18 @@ body {
 }
 
 .overlay h2 {
+    font-family: var(--serif);
     color: rgba(0, 0, 0, 0.8);
 }
 
 .overlay button {
+    font-family: var(--sans);
     padding: 15px 30px;
-    margin: 10px; 
+    margin: 10px;
     font-size: 2em;
     cursor: pointer;
     border: none;
     border-radius: 10px;
-    /*background-color: #007bff;*/
-    /*background-color: rgba(0, 123, 255, 0.3);*/
     background-color: rgba(0, 0, 0, 0.9);
     color: white;
     transition: background-color 0.3s ease;
@@ -117,6 +128,7 @@ body {
 }
 
 #closeInstructions {
+    font-family: var(--sans);
     background-color: rgba(0,0,0,0.9);
     color: white;
     border: none;
@@ -146,7 +158,6 @@ body {
     .overlay button {
         font-size: 1em;
         width: 35%;
-        font-size: 1em;
         padding: 15px;
     }
 
@@ -155,11 +166,32 @@ body {
     }
 
     .clickable {
-        font-size: 1em;
+        font-family: var(--sans);
+        color: #00000f;
+        text-decoration: underline;
+        font-style: italic;
+        cursor: pointer;
+        margin: 10px;
+        font-size: 2em;
     }
     .popup {
-        font-size: 15px;
-        width: 50%;
+        font-family: var(--sans);
+        color: black;
+        font-size: 35px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin-bottom: 50px;
+        background: rgba(255, 255, 255, 1);
+        border: 5px solid rgba(0,0,0,0.9);
+        border-radius: 10px;
+        padding: 30px;
+        width: 80%;
+        max-width: 600px;
+        text-align: center;
+        z-index: 15;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
     }
 }
 
