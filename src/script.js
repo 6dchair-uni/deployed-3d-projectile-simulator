@@ -43,38 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
     firstPage.style.display = "flex";
   });
 
-  backToWelcome.addEventListener("click", () => {
-  // Hide simulator
-  canvas.style.display = "none";
-  backToWelcome.style.display = "none";
-
-  // Show home page
-  firstPage.style.display = "flex";
-
-  // Hide simulator UI
-  if (isSceneInitialized) {
-    const guiElement = document.querySelector(".lil-gui");
-
-    if (guiElement) {
-      guiElement.style.display = "none";
-    }
-
-    const projectileInfo = document.getElementById("projectileInfo");
-
-    if (projectileInfo) {
-      projectileInfo.style.display = "none";
-    }
-
-    const heightLabel = document.getElementById("launchHeightLabel");
-
-    if (heightLabel) {
-      heightLabel.style.display = "none";
-    }
-  }
-});
-
-  
-
   // =============================================================
   // INSTRUCTIONS
   // =============================================================
