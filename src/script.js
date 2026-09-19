@@ -4,10 +4,6 @@ import * as dat from 'lil-gui';
 import * as CANNON from 'cannon-es';
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ============================================================
-  // PAGE ELEMENTS
-  // ============================================================
-
   const firstPage = document.getElementById("firstPage");
   const simulateButton = document.getElementById("simulateButton");
   const instructionsText = document.getElementById("instructionsText");
@@ -17,10 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const backToWelcome = document.getElementById("backToWelcome");
 
   let isSceneInitialized = false;
-
-  // ============================================================
-  // START SIMULATOR
-  // ============================================================
 
   simulateButton.addEventListener("click", () => {
     firstPage.style.display = "none";
@@ -33,19 +25,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ============================================================
-  // RETURN TO WELCOME PAGE
-  // ============================================================
-
   backToWelcome.addEventListener("click", () => {
     canvas.style.display = "none";
     backToWelcome.style.display = "none";
     firstPage.style.display = "flex";
   });
-
-  // ============================================================
-  // INSTRUCTIONS
-  // ============================================================
 
   instructionsText.addEventListener("click", () => {
     instructionsPopup.classList.remove("hidden");
@@ -55,23 +39,19 @@ document.addEventListener("DOMContentLoaded", () => {
     instructionsPopup.classList.add("hidden");
   });
 
-  // ============================================================
-  // THREE.JS SCENE
-  // ============================================================
-
   function initializeScene() {
-    // ------------------------------------------------------------
+    // =============================================================
     // SIZES
-    // ------------------------------------------------------------
+    // =============================================================
 
     const sizes = {
       width: window.innerWidth,
       height: window.innerHeight,
     };
 
-    // ------------------------------------------------------------
+    // =============================================================
     // GUI
-    // ------------------------------------------------------------
+    // =============================================================
 
     const gui = new dat.GUI();
 
@@ -82,25 +62,18 @@ document.addEventListener("DOMContentLoaded", () => {
     gui.domElement.style.fontFamily = "'IBM Plex Mono', monospace";
     gui.domElement.style.zIndex = "20";
 
-    // ------------------------------------------------------------
-    // CANVAS
-    // ------------------------------------------------------------
-
-    const canvas = document.querySelector("canvas.webgl");
-
-    // ==============================================================
-    // THREE.JS SETUP
-    // ==============================================================
+    // =============================================================
+    // THREE.JS SCENE
+    // =============================================================
 
     const scene = new THREE.Scene();
 
-    // Transparent scene.
-    // This allows the CSS background behind the canvas to show.
+    // Transparent so the CSS background remains visible.
     scene.background = null;
 
-    // ------------------------------------------------------------
+    // =============================================================
     // CAMERA
-    // ------------------------------------------------------------
+    // =============================================================
 
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -110,13 +83,13 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     // Closer default view
-    camera.position.set(0, 3.5, 9);
+    camera.position.set(0, 4, 12);
 
     scene.add(camera);
 
-    // ------------------------------------------------------------
+    // =============================================================
     // RENDERER
-    // ------------------------------------------------------------
+    // =============================================================
 
     const renderer = new THREE.WebGLRenderer({
       canvas: canvas,
@@ -130,9 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // ==============================================================
+    // =============================================================
     // ORBIT CONTROLS
-    // ==============================================================
+    // =============================================================
 
     const controls = new OrbitControls(camera, canvas);
 
@@ -140,11 +113,9 @@ document.addEventListener("DOMContentLoaded", () => {
     controls.maxDistance = 50;
     controls.enableDamping = true;
 
-    controls.target.set(0, 1, 0);
-
-    // ==============================================================
+    // =============================================================
     // LIGHTING
-    // ==============================================================
+    // =============================================================
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
@@ -159,9 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scene.add(directionalLight);
 
-    // ==============================================================
+    // =============================================================
     // BALL
-    // ==============================================================
+    // =============================================================
 
     const textureLoader = new THREE.TextureLoader();
 
@@ -180,14 +151,13 @@ document.addEventListener("DOMContentLoaded", () => {
       ballMaterial
     );
 
-    ball.position.set(-7, 1.25, 0);
     ball.castShadow = true;
 
     scene.add(ball);
 
-    // ==============================================================
+    // =============================================================
     // GROUND
-    // ==============================================================
+    // =============================================================
 
     const groundMaterial = new THREE.MeshPhysicalMaterial({
       color: 0xaaaaaa,
@@ -211,9 +181,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scene.add(ground);
 
-    // ==============================================================
+    // =============================================================
     // GROUND BORDERS
-    // ==============================================================
+    // =============================================================
 
     const borderMaterial = new THREE.MeshStandardMaterial({
       color: 0x000000,
@@ -237,9 +207,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scene.add(rightBorder);
 
-    // ==============================================================
-    // LAUNCH HEIGHT BOX
-    // ==============================================================
+    // =============================================================
+    // LAUNCH PLATFORM
+    // =============================================================
 
     const launchBoxGeometry = new THREE.BoxGeometry(1.5, 1, 1.5);
 
@@ -247,21 +217,18 @@ document.addEventListener("DOMContentLoaded", () => {
       color: 0x666666,
       roughness: 0.7,
       metalness: 0.2,
-      transparent: true,
-      opacity: 0.8,
     });
 
     const launchBox = new THREE.Mesh(launchBoxGeometry, launchBoxMaterial);
 
-    launchBox.position.set(-7, 0.5, 0);
     launchBox.castShadow = true;
     launchBox.receiveShadow = true;
 
     scene.add(launchBox);
 
-    // ==============================================================
+    // =============================================================
     // HEIGHT LABEL
-    // ==============================================================
+    // =============================================================
 
     const heightLabel = document.createElement("div");
 
@@ -273,18 +240,44 @@ document.addEventListener("DOMContentLoaded", () => {
     heightLabel.style.fontFamily = "'IBM Plex Mono', monospace";
     heightLabel.style.fontSize = "14px";
     heightLabel.style.fontWeight = "600";
-    heightLabel.style.color = "#000";
+    heightLabel.style.color = "#111";
     heightLabel.style.background = "rgba(255,255,255,0.85)";
     heightLabel.style.padding = "4px 8px";
     heightLabel.style.borderRadius = "4px";
     heightLabel.style.pointerEvents = "none";
-    heightLabel.style.zIndex = "25";
+    heightLabel.style.zIndex = "15";
 
     document.body.appendChild(heightLabel);
 
-    // ==============================================================
-    // CANNON PHYSICS WORLD
-    // ==============================================================
+    // =============================================================
+    // PROJECTILE INFORMATION PANEL
+    // =============================================================
+
+    const projectileInfo = document.createElement("div");
+
+    projectileInfo.id = "projectileInfo";
+
+    projectileInfo.style.position = "fixed";
+    projectileInfo.style.right = "20px";
+    projectileInfo.style.bottom = "20px";
+    projectileInfo.style.width = "280px";
+    projectileInfo.style.padding = "16px";
+    projectileInfo.style.background = "rgba(255,255,255,0.92)";
+    projectileInfo.style.border = "1px solid rgba(0,0,0,0.15)";
+    projectileInfo.style.borderRadius = "8px";
+    projectileInfo.style.boxShadow = "0 4px 15px rgba(0,0,0,0.15)";
+    projectileInfo.style.fontFamily = "'IBM Plex Mono', monospace";
+    projectileInfo.style.fontSize = "12px";
+    projectileInfo.style.lineHeight = "1.7";
+    projectileInfo.style.color = "#111";
+    projectileInfo.style.zIndex = "20";
+    projectileInfo.style.display = "none";
+
+    document.body.appendChild(projectileInfo);
+
+    // =============================================================
+    // CANNON WORLD
+    // =============================================================
 
     const world = new CANNON.World();
 
@@ -304,9 +297,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     world.defaultContactMaterial = defaultContactMaterial;
 
-    // ==============================================================
+    // =============================================================
     // PHYSICS GROUND
-    // ==============================================================
+    // =============================================================
 
     const groundShape = new CANNON.Box(new CANNON.Vec3(7.5, 0.25, 2.5));
 
@@ -318,20 +311,18 @@ document.addEventListener("DOMContentLoaded", () => {
     groundBody.addShape(groundShape);
     world.addBody(groundBody);
 
-    // ==============================================================
-    // PHYSICS LAUNCH BOX
-    // ==============================================================
+    // =============================================================
+    // PHYSICS LAUNCH PLATFORM
+    // =============================================================
 
     let launchBoxBody = null;
 
     function updateLaunchBoxPhysics(height) {
-      // Remove previous box
       if (launchBoxBody) {
         world.removeBody(launchBoxBody);
         launchBoxBody = null;
       }
 
-      // No box at zero height
       if (height <= 0) {
         return;
       }
@@ -347,15 +338,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       launchBoxBody.addShape(boxShape);
 
-      // Bottom of box = floor
+      // Bottom of platform touches y = 0
       launchBoxBody.position.set(-7, height / 2, 0);
 
       world.addBody(launchBoxBody);
     }
 
-    // ==============================================================
+    // =============================================================
     // PHYSICS BALL
-    // ==============================================================
+    // =============================================================
 
     const ballShape = new CANNON.Sphere(0.25);
 
@@ -365,13 +356,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     ballBody.addShape(ballShape);
-    ballBody.position.set(-7, 1.25, 0);
 
     world.addBody(ballBody);
 
-    // ==============================================================
-    // PROJECTILE TRAJECTORY
-    // ==============================================================
+    // =============================================================
+    // PROJECTILE PATH
+    // =============================================================
 
     let trajectoryLine = null;
 
@@ -389,59 +379,56 @@ document.addEventListener("DOMContentLoaded", () => {
     function drawTrajectory() {
       clearTrajectory();
 
-      const angle = THREE.MathUtils.degToRad(settings.angle);
+      const angleRadians = THREE.MathUtils.degToRad(settings.angle);
       const velocity = settings.velocity;
       const height = settings.launchHeight;
       const gravity = 9.82;
 
-      // ------------------------------------------------------------
-      // Initial velocity components
-      // ------------------------------------------------------------
+      // Starting position is the ball center.
+      const x0 = -7;
+      const y0 = height + 0.25;
 
-      const vx = velocity * Math.cos(angle);
-      const vy = velocity * Math.sin(angle);
+      const vx = velocity * Math.cos(angleRadians);
+      const vy = velocity * Math.sin(angleRadians);
 
-      // ------------------------------------------------------------
-      // Determine time until projectile reaches floor
-      //
-      // y(t) = h + vy*t - 1/2*g*t²
-      //
-      // Solve y(t) = 0
-      // ------------------------------------------------------------
+      /*
+       * The ball touches the ground when
+       * its CENTER reaches y = 0.25.
+       *
+       * Therefore:
+       *
+       * y(t) = y0 + vy*t - 0.5*g*t²
+       *
+       * and we solve:
+       *
+       * y(t) = 0.25
+       */
 
-      const discriminant = vy * vy + 2 * gravity * height;
+      const relativeHeight = height;
+
+      const discriminant = vy * vy + 2 * gravity * relativeHeight;
       const flightTime = (vy + Math.sqrt(discriminant)) / gravity;
-
-      // ------------------------------------------------------------
-      // Generate trajectory points
-      // ------------------------------------------------------------
 
       const points = [];
       const numberOfPoints = 100;
 
       for (let i = 0; i <= numberOfPoints; i++) {
-        const t = (flightTime * i) / numberOfPoints;
+        const t = flightTime * (i / numberOfPoints);
 
-        const x = -7 + vx * t;
-        const y = height + vy * t - 0.5 * gravity * t * t;
+        const x = x0 + vx * t;
+        const y = y0 + vy * t - 0.5 * gravity * t * t;
 
-        // Keep final point exactly at floor
-        const finalY = Math.max(y, 0);
-
-        points.push(new THREE.Vector3(x, finalY, 0));
+        points.push(new THREE.Vector3(x, Math.max(y, 0.25), 0));
       }
-
-      // ------------------------------------------------------------
-      // Create dashed line
-      // ------------------------------------------------------------
 
       const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
       const material = new THREE.LineDashedMaterial({
-        color: 0x000000,
-        dashSize: 0.18,
-        gapSize: 0.12,
-        linewidth: 1,
+        color: 0x111111,
+        dashSize: 0.25,
+        gapSize: 0.15,
+        transparent: true,
+        opacity: 0.75,
       });
 
       trajectoryLine = new THREE.Line(geometry, material);
@@ -449,159 +436,185 @@ document.addEventListener("DOMContentLoaded", () => {
       trajectoryLine.computeLineDistances();
 
       scene.add(trajectoryLine);
+
+      // ===========================================================
+      // COMPUTED VALUES
+      // ===========================================================
+
+      const maximumHeight = y0 + (vy * vy) / (2 * gravity);
+      const range = vx * flightTime;
+      const finalX = x0 + range;
+
+      projectileInfo.innerHTML = `
+        <div style="font-weight:600; font-size:14px; margin-bottom:8px;">
+          Projectile Calculation
+        </div>
+
+        <div>Launch Height: <strong>${height.toFixed(2)} m</strong></div>
+        <div>Launch Height: <strong>${(height * 100).toFixed(1)} cm</strong></div>
+        <div>Initial Velocity: <strong>${velocity.toFixed(2)} m/s</strong></div>
+        <div>Launch Angle: <strong>${settings.angle.toFixed(2)}°</strong></div>
+        <div>Ball Mass: <strong>${settings.mass.toFixed(2)} kg</strong></div>
+        <div>Gravity: <strong>${gravity.toFixed(2)} m/s²</strong></div>
+
+        <hr style="margin:8px 0; border:0; border-top:1px solid #ddd;">
+
+        <div>Horizontal Velocity: <strong>${vx.toFixed(2)} m/s</strong></div>
+        <div>Vertical Velocity: <strong>${vy.toFixed(2)} m/s</strong></div>
+        <div>Time of Flight: <strong>${flightTime.toFixed(2)} s</strong></div>
+        <div>Maximum Height: <strong>${maximumHeight.toFixed(2)} m</strong></div>
+        <div>Horizontal Range: <strong>${range.toFixed(2)} m</strong></div>
+        <div>Landing X: <strong>${finalX.toFixed(2)} m</strong></div>
+
+        <div style="margin-top:8px; font-size:10px; opacity:0.65;">
+          Air resistance: neglected
+        </div>
+      `;
+
+      projectileInfo.style.display = "block";
     }
 
-    // ==============================================================
-    // OBJECTS TO UPDATE
-    // ==============================================================
-
-    const objectsToUpdate = [
-      {
-        mesh: ball,
-        body: ballBody,
-      },
-    ];
-
-    // ==============================================================
+    // =============================================================
     // GUI SETTINGS
-    // ==============================================================
+    // =============================================================
 
     const settings = {
       angle: 45,
       velocity: 10,
       mass: 5,
 
-      // Default = 1 meter = 100 cm
+      // 100 cm default
       launchHeight: 1.0,
 
-      // ------------------------------------------------------------
-      // RESET
-      // ------------------------------------------------------------
-
       reset: () => {
+        ballBody.velocity.set(0, 0, 0);
+        ballBody.angularVelocity.set(0, 0, 0);
+
+        updateLaunchHeight();
         clearTrajectory();
 
-        ballBody.velocity.set(0, 0, 0);
-        ballBody.angularVelocity.set(0, 0, 0);
-        ballBody.position.set(-7, settings.launchHeight, 0);
-
-        ballBody.mass = settings.mass;
-        ballBody.updateMassProperties();
+        projectileInfo.style.display = "none";
       },
 
-      // ------------------------------------------------------------
-      // LAUNCH
-      // ------------------------------------------------------------
-
       launch: () => {
-        // Apply selected mass
+        // Mass is still assigned to the
+        // physics body, but does not affect
+        // trajectory because air resistance
+        // is neglected.
+
         ballBody.mass = settings.mass;
         ballBody.updateMassProperties();
 
-        // Convert degrees → radians
-        const angleInRadians = THREE.MathUtils.degToRad(settings.angle);
-
-        // IMPORTANT:
-        // Velocity is NOT divided by mass.
-        //
-        // In ideal projectile motion,
-        // mass does not affect the trajectory.
+        const angleRadians = THREE.MathUtils.degToRad(settings.angle);
         const speed = settings.velocity;
 
-        const vx = speed * Math.cos(angleInRadians);
-        const vy = speed * Math.sin(angleInRadians);
+        // IMPORTANT:
+        // No mass-based speed adjustment.
+        //
+        // In ideal projectile motion:
+        //
+        // vx = v cos(theta)
+        // vy = v sin(theta)
 
-        // Stop existing motion
-        ballBody.velocity.set(0, 0, 0);
-        ballBody.angularVelocity.set(0, 0, 0);
+        ballBody.velocity.set(
+          speed * Math.cos(angleRadians),
+          speed * Math.sin(angleRadians),
+          0
+        );
 
-        // Make sure ball starts at selected height
-        ballBody.position.set(-7, settings.launchHeight, 0);
+        // Draw the theoretical
+        // trajectory using the
+        // exact same values.
 
-        // Apply projectile velocity
-        ballBody.velocity.set(vx, vy, 0);
-
-        // Draw mathematical trajectory
         drawTrajectory();
       },
     };
 
-    // ==============================================================
+    // =============================================================
     // GUI CONTROLS
-    // ==============================================================
+    // =============================================================
 
     gui.add(settings, "angle", 0, 90, 1).name("Launch Angle (°)");
-    gui.add(settings, "velocity", 0, 100, 1).name("Launch Velocity (m/s)");
-    gui.add(settings, "mass", 0.1, 100, 0.1).name("Ball Mass (kg)");
+    gui.add(settings, "velocity", 0, 100, 0.1).name("Velocity (m/s)");
+    gui.add(settings, "mass", 0.1, 100, 0.1).name("Mass (kg)");
 
     gui
-      .add(settings, "launchHeight", 0, 10, 0.1)
-      .name("Launch Height (m)")
+      .add(settings, "launchHeight", 0, 10, 0.01)
+      .name("Height (m)")
       .onChange(() => {
         updateLaunchHeight();
-
-        // Changing height invalidates
-        // the old predicted trajectory.
         clearTrajectory();
+
+        projectileInfo.style.display = "none";
       });
 
     gui.add(settings, "reset").name("Reset");
     gui.add(settings, "launch").name("Launch");
 
-    // ==============================================================
+    // =============================================================
     // UPDATE LAUNCH HEIGHT
-    // ==============================================================
+    // =============================================================
 
     function updateLaunchHeight() {
       const height = settings.launchHeight;
 
-      // ------------------------------------------------------------
-      // Visual box
-      // ------------------------------------------------------------
+      // -------------------------------------------------------------
+      // VISUAL BOX
+      // -------------------------------------------------------------
 
       if (height <= 0) {
         launchBox.visible = false;
       } else {
         launchBox.visible = true;
 
-        // Original box height = 1
-        // Scaling Y directly makes it
-        // represent the selected height.
-        launchBox.scale.set(1, height, 1);
+        launchBox.scale.y = height;
 
-        // Bottom of box stays at y = 0
+        // Bottom touches floor
         launchBox.position.set(-7, height / 2, 0);
       }
 
-      // ------------------------------------------------------------
-      // Ball
-      //
-      // Ball center is placed at launch height.
-      // ------------------------------------------------------------
+      // -------------------------------------------------------------
+      // BALL
+      // -------------------------------------------------------------
 
       ballBody.velocity.set(0, 0, 0);
       ballBody.angularVelocity.set(0, 0, 0);
-      ballBody.position.set(-7, height, 0);
 
-      // ------------------------------------------------------------
-      // Physics box
-      // ------------------------------------------------------------
+      /*
+       * The launch height is the height
+       * of the BALL'S CENTER above
+       * the top of the platform.
+       *
+       * Therefore the center of the ball
+       * is:
+       *
+       * platform height + radius
+       */
+
+      ballBody.position.set(-7, height + 0.25, 0);
+
+      // Keep visual ball synchronized
+      ball.position.copy(ballBody.position);
+
+      // -------------------------------------------------------------
+      // PHYSICS PLATFORM
+      // -------------------------------------------------------------
 
       updateLaunchBoxPhysics(height);
 
-      // ------------------------------------------------------------
-      // Height label
-      // ------------------------------------------------------------
+      // -------------------------------------------------------------
+      // HEIGHT LABEL
+      // -------------------------------------------------------------
 
-      heightLabel.textContent = `${Math.round(height * 100)} cm`;
+      heightLabel.textContent = `${(height * 100).toFixed(1)} cm`;
     }
 
-    // Initialize height
+    // Initial state = 100 cm
     updateLaunchHeight();
 
-    // ==============================================================
+    // =============================================================
     // ANIMATION
-    // ==============================================================
+    // =============================================================
 
     const clock = new THREE.Clock();
     let oldElapsedTime = 0;
@@ -611,30 +624,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const deltaTime = elapsedTime - oldElapsedTime;
       oldElapsedTime = elapsedTime;
 
-      // ------------------------------------------------------------
       // Physics
-      // ------------------------------------------------------------
-
       world.step(1 / 80, deltaTime, 3);
 
-      // ------------------------------------------------------------
-      // Update meshes
-      // ------------------------------------------------------------
+      // Synchronize visual objects
+      ball.position.copy(ballBody.position);
+      ball.quaternion.copy(ballBody.quaternion);
 
-      for (const object of objectsToUpdate) {
-        object.mesh.position.copy(object.body.position);
-        object.mesh.quaternion.copy(object.body.quaternion);
-      }
-
-      // ------------------------------------------------------------
       // Orbit controls
-      // ------------------------------------------------------------
-
       controls.update();
 
-      // ==============================================================
+      // ===========================================================
       // HEIGHT LABEL POSITION
-      // ==============================================================
+      // ===========================================================
 
       if (launchBox.visible) {
         const labelPosition = new THREE.Vector3(
@@ -648,25 +650,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const x = (labelPosition.x * 0.5 + 0.5) * sizes.width;
         const y = (-labelPosition.y * 0.5 + 0.5) * sizes.height;
 
-        heightLabel.style.display = "block";
         heightLabel.style.left = `${x}px`;
         heightLabel.style.top = `${y}px`;
+        heightLabel.style.display = "block";
       } else {
         heightLabel.style.display = "none";
       }
 
-      // ------------------------------------------------------------
       // Render
-      // ------------------------------------------------------------
-
       renderer.render(scene, camera);
 
-      window.requestAnimationFrame(tick);
+      requestAnimationFrame(tick);
     };
 
-    // ==============================================================
+    // =============================================================
     // RESIZE
-    // ==============================================================
+    // =============================================================
 
     window.addEventListener("resize", () => {
       sizes.width = window.innerWidth;
@@ -678,10 +677,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderer.setSize(sizes.width, sizes.height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
-
-    // ==============================================================
-    // START
-    // ==============================================================
 
     tick();
   }
