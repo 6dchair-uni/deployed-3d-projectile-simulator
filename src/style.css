@@ -232,8 +232,35 @@ body {
 }
 
 
+/* Simulator parameter panel */
+.lil-gui {
+    --background-color: rgba(255, 255, 255, 0.92);
+    --text-color: #111;
+    --title-background-color: rgba(0, 0, 0, 0.9);
+    --widget-color: rgba(0, 0, 0, 0.08);
+    --hover-color: rgba(0, 0, 0, 0.14);
+    --focus-color: rgba(0, 0, 0, 0.18);
+    --number-color: #111;
+    --string-color: #111;
 
+    font-family: var(--mono) !important;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
 
+.lil-gui .title {
+    font-family: var(--mono);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
 
+.lil-gui .controller {
+    font-family: var(--mono);
+}
+
+.lil-gui input {
+    font-family: var(--mono);
+}
 
 

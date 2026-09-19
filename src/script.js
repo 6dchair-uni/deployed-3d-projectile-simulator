@@ -50,12 +50,19 @@ document.addEventListener( "DOMContentLoaded", () => {
         };
         
         // DEBUG GUI
+        // const gui = new dat.GUI();
+        // gui.domElement.style.position = 'absolute';
+        // gui.domElement.style.left = '10px';
+        // gui.domElement.style.top = '10px';
+        // gui.domElement.style.fontSize = '10px';
         const gui = new dat.GUI();
-        gui.domElement.style.position = 'absolute';
-        gui.domElement.style.left = '10px';
-        gui.domElement.style.top = '10px';
-        gui.domElement.style.fontSize = '10px';
 
+        gui.domElement.style.position = 'fixed';
+        gui.domElement.style.left = '20px';
+        gui.domElement.style.top = '20px';
+        gui.domElement.style.fontSize = '13px';
+        gui.domElement.style.fontFamily = "'IBM Plex Mono', monospace";
+        gui.domElement.style.zIndex = '20';
 
         // CANVAS
         const canvas = document.querySelector( 'canvas.webgl' );
@@ -68,7 +75,7 @@ document.addEventListener( "DOMContentLoaded", () => {
        
        // Camera
         const camera = new THREE.PerspectiveCamera( 75, sizes.width / sizes.height, 0.1, 100 );
-        camera.position.set( 0, 5, 20 );
+        camera.position.set( 0, 4, 12 );
         scene.add( camera );
 
         // Renderer
