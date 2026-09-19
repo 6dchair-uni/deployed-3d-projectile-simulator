@@ -263,4 +263,23 @@ body {
     font-family: var(--mono);
 }
 
+#launchHeightLabel {
+    position: fixed;
+    z-index: 20;
 
+    padding: 6px 10px;
+
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+
+    color: #111;
+    background: rgba(255, 255, 255, 0.9);
+
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    border-radius: 4px;
+
+    pointer-events: none;
+
+    white-space: nowrap;
+}
