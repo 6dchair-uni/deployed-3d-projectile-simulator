@@ -10,24 +10,26 @@ document.addEventListener( "DOMContentLoaded", () => {
     const instructionsPopup = document.getElementById( "instructionsPopup" );
     const closeInstructions = document.getElementById( "closeInstructions" );
     const canvas = document.querySelector( ".webgl" );
-    
+    const backToWelcome = document.getElementById("backToWelcome");
+
     // Flag to check if the scene has been initialized
     let isSceneInitialized = false;
     // Initialize Three.js scene when the simulate button is clicked
-    simulateButton.addEventListener( "click", () => {
-        // Hide firstPage screen
+    simulateButton.addEventListener("click", () => {
         firstPage.style.display = "none";
-    
-        // Show canvas and initialize Three.js scene only once
-        if ( !isSceneInitialized ) {
-            // Create the Three.js scene and start rendering
+        canvas.style.display = "block";
+        backToWelcome.style.display = "block";
+
+        if (!isSceneInitialized) {
             initializeScene();
-    
-            // Make canvas visible
-            canvas.style.display = "block";
-            
             isSceneInitialized = true;
         }
+    });
+
+    backToWelcome.addEventListener("click", () => {
+        canvas.style.display = "none";
+        backToWelcome.style.display = "none";
+        firstPage.style.display = "flex";
     });
 
     // Handle instructionsText
@@ -62,7 +64,7 @@ document.addEventListener( "DOMContentLoaded", () => {
         // THREE.JS SETUP
         const scene = new THREE.Scene();
        //scene.background = new THREE.Color( 0xb9d3ff ); // Light sky blue background
-       scene.background = new THREE.Color ( 0xFFFFFF );
+       scene.background = null;
        
        // Camera
         const camera = new THREE.PerspectiveCamera( 75, sizes.width / sizes.height, 0.1, 100 );
@@ -70,7 +72,10 @@ document.addEventListener( "DOMContentLoaded", () => {
         scene.add( camera );
 
         // Renderer
-        const renderer = new THREE.WebGLRenderer( { canvas: canvas } );
+        const renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            alpha: true
+        });
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.setSize( sizes.width, sizes.height );

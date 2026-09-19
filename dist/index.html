@@ -4,28 +4,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple 3D Projectile Simulator''</title>
+  <title>Simple 3D Projectile Simulator</title>
   
-  <script type="module" crossorigin src="./assets/index-fec1a17d.js"></script>
-  <link rel="stylesheet" href="./assets/index-00767e78.css">
+  <script type="module" crossorigin src="./assets/index-7ea2e8bc.js"></script>
+  <link rel="stylesheet" href="./assets/index-ee7cfbdf.css">
 </head>
 
 <body>
   <div id="firstPage" class="overlay">
       <h1>Simple 3D Projectile Simulator</h1>
       <h2>[v 1.0]</h2>
+
       <p id="instructionsText" class="clickable">Instructions</p>
+
       <div id="instructionsPopup" class="popup hidden">
           <p>Use the controls to adjust the launch angle, velocity, height, and mass of the ball.</p>
-          <p>When a new launch height is set, to launch, click RESET and immediately click LAUNCH.</p>        
+          <p>When a new launch height is set, to launch, click RESET and immediately click LAUNCH.</p>
           <p>Click SIMULATE button to begin the simulation.</p>
           <p>(You can zoom and rotate the whole scene.)</p>
           <button id="closeInstructions">OK</button>
       </div>
+
       <button id="simulateButton">Simulate</button>
   </div>
 
   <canvas class="webgl"></canvas>
+
+  <button id="backToWelcome">Back to Welcome</button>
 
   
 </body>
