@@ -18,9 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let isSceneInitialized = false;
 
-  // Keep GUI accessible outside initializeScene()
-  let gui = null;
-
   // =============================================================
   // ENTER SIMULATOR
   // =============================================================
@@ -30,74 +27,53 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.style.display = "block";
     backToWelcome.style.display = "block";
 
-    // Initialize only once
     if (!isSceneInitialized) {
       initializeScene();
       isSceneInitialized = true;
     }
-
-    // Show GUI again
-    if (gui) {
-      gui.domElement.style.display = "block";
-    }
-
-    // Keep projectile calculation hidden until Launch is clicked
-    const projectileInfo = document.getElementById("projectileInfo");
-
-    if (projectileInfo) {
-      projectileInfo.style.display = "none";
-    }
-
-    // Show height label
-    const heightLabel = document.getElementById("launchHeightLabel");
-
-    if (heightLabel) {
-      heightLabel.style.display = "block";
-    }
   });
 
   // =============================================================
-  // RETURN TO WELCOME PAGE / HOME
+  // RETURN TO WELCOME PAGE
   // =============================================================
 
   backToWelcome.addEventListener("click", () => {
-    // Hide simulator canvas
     canvas.style.display = "none";
-
-    // Hide Home/Back button
     backToWelcome.style.display = "none";
-
-    // Show welcome page
     firstPage.style.display = "flex";
+  });
 
-    // -------------------------------------------------------------
-    // HIDE SIMULATOR GUI
-    // -------------------------------------------------------------
+  backToWelcome.addEventListener("click", () => {
+  // Hide simulator
+  canvas.style.display = "none";
+  backToWelcome.style.display = "none";
 
-    if (gui) {
-      gui.domElement.style.display = "none";
+  // Show home page
+  firstPage.style.display = "flex";
+
+  // Hide simulator UI
+  if (isSceneInitialized) {
+    const guiElement = document.querySelector(".lil-gui");
+
+    if (guiElement) {
+      guiElement.style.display = "none";
     }
-
-    // -------------------------------------------------------------
-    // HIDE PROJECTILE CALCULATION
-    // -------------------------------------------------------------
 
     const projectileInfo = document.getElementById("projectileInfo");
 
     if (projectileInfo) {
       projectileInfo.style.display = "none";
     }
-
-    // -------------------------------------------------------------
-    // HIDE HEIGHT LABEL
-    // -------------------------------------------------------------
 
     const heightLabel = document.getElementById("launchHeightLabel");
 
     if (heightLabel) {
       heightLabel.style.display = "none";
     }
-  });
+  }
+});
+
+  
 
   // =============================================================
   // INSTRUCTIONS
@@ -116,20 +92,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // =============================================================
 
   function initializeScene() {
-    // -------------------------------------------------------------
+    // -----------------------------------------------------------
     // SIZES
-    // -------------------------------------------------------------
+    // -----------------------------------------------------------
 
     const sizes = {
       width: window.innerWidth,
       height: window.innerHeight,
     };
 
-    // =============================================================
+    // -----------------------------------------------------------
     // GUI
-    // =============================================================
+    // -----------------------------------------------------------
 
-    gui = new dat.GUI();
+    const gui = new dat.GUI();
 
     gui.domElement.style.position = "fixed";
     gui.domElement.style.left = "20px";
@@ -177,9 +153,9 @@ document.addEventListener("DOMContentLoaded", () => {
       isDraggingGUI = false;
     });
 
-    // -------------------------------------------------------------
+    // -----------------------------------------------------------
     // CANVAS
-    // -------------------------------------------------------------
+    // -----------------------------------------------------------
 
     const canvas = document.querySelector("canvas.webgl");
 
@@ -189,12 +165,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const scene = new THREE.Scene();
 
-    // Transparent scene so CSS background remains visible
+    // Transparent scene so the CSS background is visible
     scene.background = null;
 
-    // =============================================================
+    // -----------------------------------------------------------
     // CAMERA
-    // =============================================================
+    // -----------------------------------------------------------
 
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -207,9 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scene.add(camera);
 
-    // =============================================================
+    // -----------------------------------------------------------
     // RENDERER
-    // =============================================================
+    // -----------------------------------------------------------
 
     const renderer = new THREE.WebGLRenderer({
       canvas: canvas,
@@ -361,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const heightLabel = document.createElement("div");
 
     heightLabel.id = "launchHeightLabel";
-    heightLabel.textContent = "1.00 m";
+    heightLabel.textContent = "100 cm";
 
     heightLabel.style.position = "fixed";
     heightLabel.style.transform = "translate(-50%, -50%)";
@@ -442,6 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       launchBoxBody.addShape(boxShape);
 
+      // Bottom of box = floor
       launchBoxBody.position.set(-7, height / 2, 0);
 
       world.addBody(launchBoxBody);
@@ -566,14 +543,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const angleInRadians = (settings.angle * Math.PI) / 180;
         const speed = settings.velocity;
 
-        /*
-         * NOTE:
-         * The launch velocity should NOT be divided by
-         * sqrt(mass) if velocity is intended to represent
-         * the actual initial velocity.
-         */
-
-        const adjustedSpeed = speed;
+        // Preserve your existing mass-based velocity adjustment.
+        const adjustedSpeed = speed / Math.sqrt(settings.mass);
 
         const vx = adjustedSpeed * Math.cos(angleInRadians);
         const vy = adjustedSpeed * Math.sin(angleInRadians);
@@ -606,8 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <strong>PROJECTILE</strong><br><br>
           Launch Angle: ${settings.angle.toFixed(1)}°<br>
           Launch Velocity: ${settings.velocity.toFixed(2)} m/s<br>
-          Initial Vx: ${vx.toFixed(2)} m/s<br>
-          Initial Vy: ${vy.toFixed(2)} m/s<br>
+          Effective Velocity: ${adjustedSpeed.toFixed(2)} m/s<br>
           Launch Height: ${settings.launchHeight.toFixed(2)} m<br>
           Mass: ${settings.mass.toFixed(2)} kg<br>
           Air Resistance: ${settings.airResistance ? "ON" : "OFF"}
@@ -632,6 +602,8 @@ document.addEventListener("DOMContentLoaded", () => {
         launchBox.visible = true;
 
         launchBox.scale.y = height;
+
+        // Bottom remains at floor
         launchBox.position.y = height / 2;
       }
 
@@ -654,7 +626,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // LABEL
       // ---------------------------------------------------------
 
-      heightLabel.textContent = `${height.toFixed(2)} m`;
+      heightLabel.textContent = `${Math.round(height * 100)} cm`;
     }
 
     // =============================================================
@@ -789,10 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
 
-    // =============================================================
-    // START
-    // =============================================================
-
+    // Start
     tick();
   }
 });
