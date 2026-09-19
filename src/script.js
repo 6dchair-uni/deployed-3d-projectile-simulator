@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const backToWelcome = document.getElementById("backToWelcome");
 
   let isSceneInitialized = false;
+  let gui = null;
 
   // =============================================================
   // WELCOME PAGE
@@ -27,12 +28,48 @@ document.addEventListener("DOMContentLoaded", () => {
       initializeScene();
       isSceneInitialized = true;
     }
+
+    // Show GUI again
+    if (gui) {
+      gui.domElement.style.display = "block";
+    }
+
+    // Show height label again
+    const heightLabel = document.getElementById("launchHeightLabel");
+
+    if (heightLabel) {
+      heightLabel.style.display = "block";
+    }
+
+    // Keep calculation panel hidden until Launch is clicked
+    const projectileInfo = document.getElementById("projectileInfo");
+
+    if (projectileInfo) {
+      projectileInfo.style.display = "none";
+    }
   });
 
   backToWelcome.addEventListener("click", () => {
     canvas.style.display = "none";
     backToWelcome.style.display = "none";
     firstPage.style.display = "flex";
+    // hide gui
+    if(gui) {
+      gui.domElement.style.display = "none";
+    }
+    // Hide projectile calculation panel
+    const projectileInfo = document.getElementById("projectileInfo");
+
+    if (projectileInfo) {
+      projectileInfo.style.display = "none";
+    }
+
+    // Hide height label
+    const heightLabel = document.getElementById("launchHeightLabel");
+
+    if (heightLabel) {
+      heightLabel.style.display = "none";
+    }
   });
 
   instructionsText.addEventListener("click", () => {
@@ -51,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===========================================================
     // CONSTANTS
     // ===========================================================
-
+    gui = new dat.GUI();
     const GRAVITY = 9.82;
 
     // Radius of the visual/physics ball
@@ -79,8 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // GUI
     // ===========================================================
 
-    const gui = new dat.GUI();
-
+    gui = new dat.GUI();
+  
     gui.domElement.style.position = "fixed";
     gui.domElement.style.left = "20px";
     gui.domElement.style.top = "20px";
